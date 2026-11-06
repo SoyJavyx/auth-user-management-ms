@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.users.users_service.dto.CreateUserRequest;
@@ -15,9 +16,11 @@ import com.users.users_service.repository.UserRepository;
 public class DefaultUserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public DefaultUserService(UserRepository userRepository) {
+    public DefaultUserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public UserResponse createUser(CreateUserRequest request) {
@@ -31,7 +34,9 @@ public class DefaultUserService {
             User user = new User();
             user.setName(request.getName());
             user.setEmail(request.getEmail());
-            user.setPassword(request.getPassword());
+            
+            String encodedPassword = passwordEncoder.encode(request.getPassword());
+            user.setPassword(encodedPassword);
 
             User savedUser = userRepository.save(user);
             return mapToResponse(savedUser);
@@ -65,7 +70,9 @@ public class DefaultUserService {
             userAux.setName(request.getName());
             userAux.setEmail(request.getEmail());
           if(request.getPassword() != null && !request.getPassword().isEmpty()) {
-                userAux.setPassword(request.getPassword());
+
+                String encodedPassword = passwordEncoder.encode(request.getPassword());
+                userAux.setPassword(encodedPassword);
             }
             User updatedUser = userRepository.save(userAux);
             return mapToResponse(updatedUser);

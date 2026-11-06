@@ -32,6 +32,13 @@ public class User {
         this.createdAt = LocalDateTime.now();
     }
 
+    
+
+    public User() {
+    }
+
+
+
     public int getId() {
         return id;
     }

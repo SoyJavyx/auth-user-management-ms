@@ -13,8 +13,8 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 /* En el metodo buscar utilizo Optional que funciona para almacenar un
 valor o estar vacio, se utiliza para evitar referencias nulas
 esta informacion la encontre en :https://www.baeldung.com/java-optional */
-Optional<User> findByEmailIgnoreMayus(String email);
+Optional<User> findByEmailIgnoreCase(String email);
 
-boolean existsByEmailIgnoreMayus(String email);
+boolean existsByEmailIgnoreCase(String email);
 
 }

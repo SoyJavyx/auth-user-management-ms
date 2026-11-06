@@ -25,7 +25,7 @@ public class DefaultUserService {
 
     public UserResponse createUser(CreateUserRequest request) {
         try{
-            boolean emailExists = userRepository.existsByEmailIgnoreMayus(request.getEmail());
+            boolean emailExists = userRepository.existsByEmailIgnoreCase(request.getEmail());
             
             if (emailExists) {
                 throw new RuntimeException("El correo ya está registrado");
@@ -38,6 +38,8 @@ public class DefaultUserService {
             String encodedPassword = passwordEncoder.encode(request.getPassword());
             user.setPassword(encodedPassword);
 
+            user.setCreatedAt(java.time.LocalDateTime.now());
+            
             User savedUser = userRepository.save(user);
             return mapToResponse(savedUser);
 

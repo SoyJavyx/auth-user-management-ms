@@ -1,0 +1,18 @@
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Java / Maven
+**/target/
+
+# Angular / Node
+**/node_modules/
+**/dist/
+**/.angular/
+
+# IDE
+.vscode/
+.idea/
+*.iml
+

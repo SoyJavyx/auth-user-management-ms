@@ -12,7 +12,8 @@
 **/.angular/
 
 # IDE
-.vscode/
 .idea/
 *.iml
-
+.vscode/*
+!.vscode/launch.json
+**/frontend/.vscode/

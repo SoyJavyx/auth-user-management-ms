@@ -1,53 +1,56 @@
 package com.auth.auth_service.controller;
 
-import com.auth.auth_service.dto.LoginRequest;
-import com.auth.auth_service.dto.TokenResponse;
-import com.auth.auth_service.entity.User;
-import com.auth.auth_service.repository.UserRepository;
-import com.auth.auth_service.security.JwtProvider;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestTemplate;
 
-import java.util.Optional;
+import com.auth.auth_service.dto.AuthUserResponse;
+import com.auth.auth_service.dto.LoginRequest;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping({"/auth", "/api/auth"})
 public class AuthController {
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final JwtProvider jwtProvider;
+    private final RestTemplate restTemplate;
 
-   
-    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtProvider jwtProvider) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.jwtProvider = jwtProvider;
+    // URL configurada por variable de entorno o application.properties
+    @Value("${users.service.url:http://localhost:8082}")
+    private String usersServiceUrl;
+
+    public AuthController(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         try {
-            // Buscar el usuario por email
-            Optional<User> userOptional = userRepository.findByEmailIgnoreCase(loginRequest.getEmail());
+            // El Auth Service valida las credenciales preguntando a Users Service por HTTP
+            String url = usersServiceUrl + "/users/validate";
+            ResponseEntity<AuthUserResponse> response = restTemplate.postForEntity(url, loginRequest, AuthUserResponse.class);
 
-            if (userOptional.isPresent()) {
-                User user = userOptional.get();
-                
-                // Verificar la contraseña
-                if (passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-                    // Generar token JWT
-                    String token = jwtProvider.generateToken(user.getEmail());
-                    return ResponseEntity.ok(new TokenResponse(token));
-                } else {
-                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Contraseña incorrecta");
-                }
-            } else {
-                // Usuario no encontrado
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no encontrado");
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                return ResponseEntity.ok(response.getBody());
             }
+
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Email o contraseña incorrectos");
+
+        } catch (HttpClientErrorException.Unauthorized | HttpClientErrorException.BadRequest e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Email o contraseña incorrectos");
+        } catch (HttpStatusCodeException e) {
+            if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Email o contraseña incorrectos");
+            }
+            return ResponseEntity.status(e.getStatusCode()).body("Error en servicio de usuarios: " + e.getResponseBodyAsString());
+        } catch (ResourceAccessException e) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("No fue posible conectar con el servicio de usuarios");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error en el servidor");
         }

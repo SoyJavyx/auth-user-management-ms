@@ -115,6 +115,18 @@ public class DefaultUserService {
         }
     }
 
+    // Valida credenciales para el servicio de autenticacion
+    public UserResponse validateUser(String email, String rawPassword) {
+        Optional<User> userOptional = userRepository.findByEmailIgnoreCase(email);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            if (passwordEncoder.matches(rawPassword, user.getPassword())) {
+                return mapToResponse(user);
+            }
+        }
+        return null;
+    }
+
     private UserResponse mapToResponse(User user) {
         UserResponse response = new UserResponse();
         response.setId(user.getId());

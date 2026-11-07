@@ -1,0 +1,35 @@
+@if (isOpen) {
+  <div class="modal-backdrop" (click)="onCancel()" role="dialog" aria-modal="true" aria-labelledby="dialog-title">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-icon-wrapper">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20" aria-hidden="true" focusable="false">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+          <line x1="12" y1="9" x2="12" y2="13" />
+          <line x1="12" y1="17" x2="12.01" y2="17" />
+        </svg>
+      </div>
+
+      <div class="modal-content">
+        <h2 id="dialog-title" class="modal-title">¿Eliminar usuario?</h2>
+        <p class="modal-description">
+          Esta acción no se puede deshacer. Se eliminará la cuenta de
+          <strong>{{ user?.name }}</strong> ({{ user?.email }}).
+        </p>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" (click)="onCancel()" [disabled]="isDeleting">
+          Cancelar
+        </button>
+        <button type="button" class="btn-delete" (click)="onConfirm()" [disabled]="isDeleting">
+          @if (isDeleting) {
+            <span class="spinner" aria-hidden="true"></span>
+            <span>Eliminando...</span>
+          } @else {
+            <span>Eliminar usuario</span>
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

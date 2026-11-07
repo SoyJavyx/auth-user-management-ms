@@ -15,5 +15,5 @@
 .idea/
 *.iml
 .vscode/*
-!.vscode/launch.json
+!.vscode/launch.json.example
 **/frontend/.vscode/

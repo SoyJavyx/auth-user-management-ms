@@ -124,6 +124,15 @@ http://localhost:3000
 
 ---
 
+### Opción alternativa: Ejecutar y depurar en Visual Studio Code
+
+Si prefieres levantar los microservicios directamente desde VS Code:
+1. Copia la plantilla `.vscode/launch.json.example` como `.vscode/launch.json`.
+2. Si cambiaste la contraseña de base de datos en tu `.env`, ajústala en `DB_PASSWORD`.
+3. En la pestaña **Ejecutar y depurar (Run and Debug)** de VS Code, ejecuta `UsersServiceApplication` y `AuthServiceApplication`.
+
+---
+
 ## 5. Decisiones de diseño y posibles mejoras
 
 ### Decisiones tomadas:
